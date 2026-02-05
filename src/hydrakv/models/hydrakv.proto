@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package kv;
+
+option go_package = "hydrakv/proto/kvpb";
+
+import "google/protobuf/empty.proto";
+
+// ===== Requests =====
+
+message CreateDBRequest {
+  string name = 1;
+}
+
+message SetRequest {
+  string db = 1;
+  string apikey = 2;
+  int64 ttl = 3;
+  string key = 4;
+  string value = 5;
+}
+
+message GetRequest {
+  string db = 1;
+  string apikey = 2;
+  string key = 3;
+}
+
+message DeleteRequest {
+  string db = 1;
+  string apikey = 2;
+  string key = 3;
+}
+
+message IncrRequest {
+  string db = 1;
+  string apikey = 2;
+  string key = 3;
+  string amount = 4;
+}
+
+message ExistsRequest {
+  string db = 1;
+}
+
+// ===== Responses =====
+
+message OKResponse {
+  bool ok = 1;
+}
+
+message CreateDBResponse {
+  string name = 1;
+  string apikey = 2;
+  bool created = 3;
+  bool exists = 4;
+}
+
+message GetResponse {
+  bool found = 1;
+  string value = 2;
+}
+
+message ExistsResponse {
+  bool exists = 1;
+}
+
+message HealthResponse {
+  string status = 1;
+}
+
+// ===== Service =====
+
+service KVService {
+  rpc CreateDB (CreateDBRequest) returns (CreateDBResponse);
+  rpc Set (SetRequest) returns (OKResponse);
+  rpc SetNX (SetRequest) returns (OKResponse);
+  rpc Incr (IncrRequest) returns (OKResponse);
+  rpc Get (GetRequest) returns (GetResponse);
+  rpc Delete (DeleteRequest) returns (OKResponse);
+  rpc Exists (ExistsRequest) returns (ExistsResponse);
+  rpc Health (google.protobuf.Empty) returns (HealthResponse);
+}

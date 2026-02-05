@@ -1,0 +1,20 @@
+annotated-types==0.7.0
+anyio==4.12.0
+build==1.3.0
+certifi==2025.11.12
+grpcio==1.76.0
+grpcio-tools==1.76.0
+h11==0.16.0
+httpcore==1.0.9
+httpx==0.28.1
+-e git+http://server.local:3000/oliver-sharif/hydrakv-python.git@2cb3049b756d81cfe69f3f9059c7550ec34754d7#egg=hydrakv
+idna==3.11
+loguru==0.7.3
+packaging==25.0
+protobuf==6.33.2
+pydantic==2.12.5
+pydantic_core==2.41.5
+pyproject_hooks==1.2.0
+setuptools==80.9.0
+typing-inspection==0.4.2
+typing_extensions==4.15.0
