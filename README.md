@@ -10,7 +10,7 @@ A Python client for interacting with HydraKV via gRPC or HTTP.
 pip install hydrakv
 ```
 
-### From Source (for Developers)
+### From Source (for Developers - and others)
 
 If you want to install the package from source (e.g., after cloning the repository), follow these steps:
 
