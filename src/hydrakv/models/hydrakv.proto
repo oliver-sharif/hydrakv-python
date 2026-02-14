@@ -65,6 +65,23 @@ message ExistsResponse {
   bool exists = 1;
 }
 
+message FiFoLiFoDeleteRequest {
+  string name = 1;
+}
+
+message FiFoLiFoPushRequest {
+  string name = 1;
+  string value = 2;
+}
+
+message FiFoLiFoPopRequest {
+  string name = 1;
+}
+
+message FiFoLiFoPopResponse {
+  string value = 1;
+}
+
 message HealthResponse {
   string status = 1;
 }
@@ -79,5 +96,9 @@ service KVService {
   rpc Get (GetRequest) returns (GetResponse);
   rpc Delete (DeleteRequest) returns (OKResponse);
   rpc Exists (ExistsRequest) returns (ExistsResponse);
+  rpc FiFoLiFoDelete (FiFoLiFoDeleteRequest) returns (OKResponse);
+  rpc FiFoLiFoPush (FiFoLiFoPushRequest) returns (OKResponse);
+  rpc FiFoLiFoFPop (FiFoLiFoPopRequest) returns (FiFoLiFoPopResponse);
+  rpc FiFoLiFoLPop (FiFoLiFoPopRequest) returns (FiFoLiFoPopResponse);
   rpc Health (google.protobuf.Empty) returns (HealthResponse);
 }

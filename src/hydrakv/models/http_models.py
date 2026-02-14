@@ -37,3 +37,17 @@ class Incr(BaseModel):
     key: str = Field(..., description="The key to increment.")
     delta: int = Field(1, description="The amount by which to increment the key's value.")
     apikey: str = Field(None, description="The API key for authentication.")
+
+class FiFoLiFoDelete(BaseModel):
+    name: str = Field(..., description="The name of the FiFoLiFo to delete.")
+
+class FiFoLiFoPush(BaseModel):
+    name: str = Field(..., description="The name of the FiFoLiFo to push to.")
+    value: str = Field(..., description="The value to push.")
+
+class FiFoLiFoPop(BaseModel):
+    name: str = Field(..., description="The name of the FiFoLiFo to pop from.")
+
+class FiFoLiFoCreate(BaseModel):
+    name: str = Field(..., description="The name of the FiFoLiFo to create.")
+    limit: int = Field(..., description="The limit of the FiFoLiFo.")

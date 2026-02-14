@@ -528,6 +528,159 @@ class Hydrakv:
         self._logger.debug("Created DB: " + name)
         return resp.status_code
 
+    async def fifolifo_delete(self, name: str) -> int | Any:
+        """
+        Deletes a FiFoLiFo by name.
+
+        Parameters:
+        name (str): The name of the FiFoLiFo to delete.
+
+        Returns:
+        int | Any: The status code or gRPC response.
+        """
+        ffr = FiFoLiFoDelete(name=name)
+
+        if self._use_grpc:
+            try:
+                self._logger.debug("using GRPC FIFOLIFO DELETE")
+                request = hydrakv_pb2.FiFoLiFoDeleteRequest(name=ffr.name)
+                response = self._stub.FiFoLiFoDelete(request, timeout=self._grpc_deadline)
+                return response
+            except grpc.RpcError as e:
+                self._logger.error(f"GRPC FIFOLIFO DELETE failed: {e}")
+                raise
+        else:
+            try:
+                self._logger.debug("using HTTP FIFOLIFO DELETE")
+                client = self._get_client()
+                resp = await client.request("DELETE", f"{self._http_str}{self._host}:{self._port}/fifolifo",
+                                            json=ffr.model_dump())
+                return resp.status_code
+            except Exception as e:
+                self._logger.error(f"HTTP FIFOLIFO DELETE failed: {e}")
+                raise
+
+    async def fifolifo_push(self, name: str, value: str) -> int | Any:
+        """
+        Pushes a value to a FiFoLiFo.
+
+        Parameters:
+        name (str): The name of the FiFoLiFo.
+        value (str): The value to push.
+
+        Returns:
+        int | Any: The status code or gRPC response.
+        """
+        ffp = FiFoLiFoPush(name=name, value=value)
+
+        if self._use_grpc:
+            try:
+                self._logger.debug("using GRPC FIFOLIFO PUSH")
+                request = hydrakv_pb2.FiFoLiFoPushRequest(name=ffp.name, value=ffp.value)
+                response = self._stub.FiFoLiFoPush(request, timeout=self._grpc_deadline)
+                return response
+            except grpc.RpcError as e:
+                self._logger.error(f"GRPC FIFOLIFO PUSH failed: {e}")
+                raise
+        else:
+            try:
+                self._logger.debug("using HTTP FIFOLIFO PUSH")
+                client = self._get_client()
+                resp = await client.put(f"{self._http_str}{self._host}:{self._port}/fifolifo",
+                                        json=ffp.model_dump())
+                return resp.status_code
+            except Exception as e:
+                self._logger.error(f"HTTP FIFOLIFO PUSH failed: {e}")
+                raise
+
+    async def fifo_pop(self, name: str) -> str:
+        """
+        Pops a value from a FiFo.
+
+        Parameters:
+        name (str): The name of the FiFo.
+
+        Returns:
+        str: The popped value.
+        """
+        ffp = FiFoLiFoPop(name=name)
+
+        if self._use_grpc:
+            try:
+                self._logger.debug("using GRPC FIFO POP")
+                request = hydrakv_pb2.FiFoLiFoPopRequest(name=ffp.name)
+                response = self._stub.FiFoLiFoFPop(request, timeout=self._grpc_deadline)
+                return response.value
+            except grpc.RpcError as e:
+                self._logger.error(f"GRPC FIFO POP failed: {e}")
+                raise
+        else:
+            try:
+                self._logger.debug("using HTTP FIFO POP")
+                client = self._get_client()
+                resp = await client.post(f"{self._http_str}{self._host}:{self._port}/fifo",
+                                         json=ffp.model_dump())
+                return resp.json().get("value", "")
+            except Exception as e:
+                self._logger.error(f"HTTP FIFO POP failed: {e}")
+                raise
+
+    async def lifo_pop(self, name: str) -> str:
+        """
+        Pops a value from a LiFo.
+
+        Parameters:
+        name (str): The name of the LiFo.
+
+        Returns:
+        str: The popped value.
+        """
+        ffp = FiFoLiFoPop(name=name)
+
+        if self._use_grpc:
+            try:
+                self._logger.debug("using GRPC LIFO POP")
+                request = hydrakv_pb2.FiFoLiFoPopRequest(name=ffp.name)
+                response = self._stub.FiFoLiFoLPop(request, timeout=self._grpc_deadline)
+                return response.value
+            except grpc.RpcError as e:
+                self._logger.error(f"GRPC LIFO POP failed: {e}")
+                raise
+        else:
+            try:
+                self._logger.debug("using HTTP LIFO POP")
+                client = self._get_client()
+                resp = await client.post(f"{self._http_str}{self._host}:{self._port}/lifo",
+                                         json=ffp.model_dump())
+                return resp.json().get("value", "")
+            except Exception as e:
+                self._logger.error(f"HTTP LIFO POP failed: {e}")
+                raise
+
+    async def fifolifo_create(self, name: str, limit: int) -> int:
+        """
+        Creates a new FiFoLiFo.
+        Note: This operation is only supported via HTTP.
+
+        Parameters:
+        name (str): The name of the FiFoLiFo.
+        limit (int): The limit of the FiFoLiFo.
+
+        Returns:
+        int: The status code of the response.
+        """
+        ffc = FiFoLiFoCreate(name=name, limit=limit)
+
+        try:
+            self._logger.debug("using HTTP FIFOLIFO CREATE")
+            client = self._get_client()
+            resp = await client.post(f"{self._http_str}{self._host}:{self._port}/fifolifo",
+                                     json=ffc.model_dump())
+            return resp.status_code
+        except Exception as e:
+            self._logger.error(f"HTTP FIFOLIFO CREATE failed: {e}")
+            raise
+
 
 async def main():
     hc = Hydrakv("127.0.0.1", 9191, grpc_port=9292, https=False, log_lvl="DEBUG", use_grpc=False)

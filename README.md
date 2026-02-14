@@ -153,4 +153,4 @@ if __name__ == "__main__":
 
 ## License
 
-Apache 2
+MIT
