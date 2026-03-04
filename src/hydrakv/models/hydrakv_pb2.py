@@ -25,14 +25,14 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rhydrakv.proto\x12\x02kv\x1a\x1bgoogle/protobuf/empty.proto\"\x1f\n\x0f\x43reateDBRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"Q\n\nSetRequest\x12\n\n\x02\x64\x62\x18\x01 \x01(\t\x12\x0e\n\x06\x61pikey\x18\x02 \x01(\t\x12\x0b\n\x03ttl\x18\x03 \x01(\x03\x12\x0b\n\x03key\x18\x04 \x01(\t\x12\r\n\x05value\x18\x05 \x01(\t\"5\n\nGetRequest\x12\n\n\x02\x64\x62\x18\x01 \x01(\t\x12\x0e\n\x06\x61pikey\x18\x02 \x01(\t\x12\x0b\n\x03key\x18\x03 \x01(\t\"8\n\rDeleteRequest\x12\n\n\x02\x64\x62\x18\x01 \x01(\t\x12\x0e\n\x06\x61pikey\x18\x02 \x01(\t\x12\x0b\n\x03key\x18\x03 \x01(\t\"F\n\x0bIncrRequest\x12\n\n\x02\x64\x62\x18\x01 \x01(\t\x12\x0e\n\x06\x61pikey\x18\x02 \x01(\t\x12\x0b\n\x03key\x18\x03 \x01(\t\x12\x0e\n\x06\x61mount\x18\x04 \x01(\t\"\x1b\n\rExistsRequest\x12\n\n\x02\x64\x62\x18\x01 \x01(\t\"\x18\n\nOKResponse\x12\n\n\x02ok\x18\x01 \x01(\x08\"Q\n\x10\x43reateDBResponse\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06\x61pikey\x18\x02 \x01(\t\x12\x0f\n\x07\x63reated\x18\x03 \x01(\x08\x12\x0e\n\x06\x65xists\x18\x04 \x01(\x08\"+\n\x0bGetResponse\x12\r\n\x05\x66ound\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\t\" \n\x0e\x45xistsResponse\x12\x0e\n\x06\x65xists\x18\x01 \x01(\x08\"%\n\x15\x46iFoLiFoDeleteRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"2\n\x13\x46iFoLiFoPushRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\"\n\x12\x46iFoLiFoPopRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"$\n\x13\x46iFoLiFoPopResponse\x12\r\n\x05value\x18\x01 \x01(\t\" \n\x0eHealthResponse\x12\x0e\n\x06status\x18\x01 \x01(\t2\xef\x04\n\tKVService\x12\x35\n\x08\x43reateDB\x12\x13.kv.CreateDBRequest\x1a\x14.kv.CreateDBResponse\x12%\n\x03Set\x12\x0e.kv.SetRequest\x1a\x0e.kv.OKResponse\x12\'\n\x05SetNX\x12\x0e.kv.SetRequest\x1a\x0e.kv.OKResponse\x12\'\n\x04Incr\x12\x0f.kv.IncrRequest\x1a\x0e.kv.OKResponse\x12&\n\x03Get\x12\x0e.kv.GetRequest\x1a\x0f.kv.GetResponse\x12+\n\x06\x44\x65lete\x12\x11.kv.DeleteRequest\x1a\x0e.kv.OKResponse\x12/\n\x06\x45xists\x12\x11.kv.ExistsRequest\x1a\x12.kv.ExistsResponse\x12;\n\x0e\x46iFoLiFoDelete\x12\x19.kv.FiFoLiFoDeleteRequest\x1a\x0e.kv.OKResponse\x12\x37\n\x0c\x46iFoLiFoPush\x12\x17.kv.FiFoLiFoPushRequest\x1a\x0e.kv.OKResponse\x12?\n\x0c\x46iFoLiFoFPop\x12\x16.kv.FiFoLiFoPopRequest\x1a\x17.kv.FiFoLiFoPopResponse\x12?\n\x0c\x46iFoLiFoLPop\x12\x16.kv.FiFoLiFoPopRequest\x1a\x17.kv.FiFoLiFoPopResponse\x12\x34\n\x06Health\x12\x16.google.protobuf.Empty\x1a\x12.kv.HealthResponseB\x14Z\x12hydrakv/proto/kvpbb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rhydrakv.proto\x12\x02kv\x1a\x1bgoogle/protobuf/empty.proto\"\x1f\n\x0f\x43reateDBRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"Q\n\nSetRequest\x12\n\n\x02\x64\x62\x18\x01 \x01(\t\x12\x0e\n\x06\x61pikey\x18\x02 \x01(\t\x12\x0b\n\x03ttl\x18\x03 \x01(\x03\x12\x0b\n\x03key\x18\x04 \x01(\t\x12\r\n\x05value\x18\x05 \x01(\t\"5\n\nGetRequest\x12\n\n\x02\x64\x62\x18\x01 \x01(\t\x12\x0e\n\x06\x61pikey\x18\x02 \x01(\t\x12\x0b\n\x03key\x18\x03 \x01(\t\"8\n\rDeleteRequest\x12\n\n\x02\x64\x62\x18\x01 \x01(\t\x12\x0e\n\x06\x61pikey\x18\x02 \x01(\t\x12\x0b\n\x03key\x18\x03 \x01(\t\"F\n\x0bIncrRequest\x12\n\n\x02\x64\x62\x18\x01 \x01(\t\x12\x0e\n\x06\x61pikey\x18\x02 \x01(\t\x12\x0b\n\x03key\x18\x03 \x01(\t\x12\x0e\n\x06\x61mount\x18\x04 \x01(\t\"\x1b\n\rExistsRequest\x12\n\n\x02\x64\x62\x18\x01 \x01(\t\"\x18\n\nOKResponse\x12\n\n\x02ok\x18\x01 \x01(\x08\"Q\n\x10\x43reateDBResponse\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06\x61pikey\x18\x02 \x01(\t\x12\x0f\n\x07\x63reated\x18\x03 \x01(\x08\x12\x0e\n\x06\x65xists\x18\x04 \x01(\x08\"+\n\x0bGetResponse\x12\r\n\x05\x66ound\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\t\" \n\x0e\x45xistsResponse\x12\x0e\n\x06\x65xists\x18\x01 \x01(\x08\"A\n\x15\x46iFoLiFoDeleteRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\n\n\x02\x64\x62\x18\x02 \x01(\t\x12\x0e\n\x06\x41pikey\x18\x03 \x01(\t\"N\n\x13\x46iFoLiFoPushRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\x12\n\n\x02\x64\x62\x18\x03 \x01(\t\x12\x0e\n\x06\x41pikey\x18\x04 \x01(\t\">\n\x12\x46iFoLiFoPopRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\n\n\x02\x64\x62\x18\x02 \x01(\t\x12\x0e\n\x06\x41pikey\x18\x03 \x01(\t\"@\n\x13\x46iFoLiFoPopResponse\x12\r\n\x05value\x18\x01 \x01(\t\x12\n\n\x02\x64\x62\x18\x02 \x01(\t\x12\x0e\n\x06\x41pikey\x18\x03 \x01(\t\" \n\x0eHealthResponse\x12\x0e\n\x06status\x18\x01 \x01(\t2\xef\x04\n\tKVService\x12\x35\n\x08\x43reateDB\x12\x13.kv.CreateDBRequest\x1a\x14.kv.CreateDBResponse\x12%\n\x03Set\x12\x0e.kv.SetRequest\x1a\x0e.kv.OKResponse\x12\'\n\x05SetNX\x12\x0e.kv.SetRequest\x1a\x0e.kv.OKResponse\x12\'\n\x04Incr\x12\x0f.kv.IncrRequest\x1a\x0e.kv.OKResponse\x12&\n\x03Get\x12\x0e.kv.GetRequest\x1a\x0f.kv.GetResponse\x12+\n\x06\x44\x65lete\x12\x11.kv.DeleteRequest\x1a\x0e.kv.OKResponse\x12/\n\x06\x45xists\x12\x11.kv.ExistsRequest\x1a\x12.kv.ExistsResponse\x12;\n\x0e\x46iFoLiFoDelete\x12\x19.kv.FiFoLiFoDeleteRequest\x1a\x0e.kv.OKResponse\x12\x37\n\x0c\x46iFoLiFoPush\x12\x17.kv.FiFoLiFoPushRequest\x1a\x0e.kv.OKResponse\x12?\n\x0c\x46iFoLiFoFPop\x12\x16.kv.FiFoLiFoPopRequest\x1a\x17.kv.FiFoLiFoPopResponse\x12?\n\x0c\x46iFoLiFoLPop\x12\x16.kv.FiFoLiFoPopRequest\x1a\x17.kv.FiFoLiFoPopResponse\x12\x34\n\x06Health\x12\x16.google.protobuf.Empty\x1a\x12.kv.HealthResponseB(Z&hydrakv/server/hydrakv/proto/kvpb;kvpbb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'hydrakv_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
-  _globals['DESCRIPTOR']._serialized_options = b'Z\022hydrakv/proto/kvpb'
+  _globals['DESCRIPTOR']._serialized_options = b'Z&hydrakv/server/hydrakv/proto/kvpb;kvpb'
   _globals['_CREATEDBREQUEST']._serialized_start=50
   _globals['_CREATEDBREQUEST']._serialized_end=81
   _globals['_SETREQUEST']._serialized_start=83
@@ -54,15 +54,15 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_EXISTSRESPONSE']._serialized_start=534
   _globals['_EXISTSRESPONSE']._serialized_end=566
   _globals['_FIFOLIFODELETEREQUEST']._serialized_start=568
-  _globals['_FIFOLIFODELETEREQUEST']._serialized_end=605
-  _globals['_FIFOLIFOPUSHREQUEST']._serialized_start=607
-  _globals['_FIFOLIFOPUSHREQUEST']._serialized_end=657
-  _globals['_FIFOLIFOPOPREQUEST']._serialized_start=659
-  _globals['_FIFOLIFOPOPREQUEST']._serialized_end=693
-  _globals['_FIFOLIFOPOPRESPONSE']._serialized_start=695
-  _globals['_FIFOLIFOPOPRESPONSE']._serialized_end=731
-  _globals['_HEALTHRESPONSE']._serialized_start=733
-  _globals['_HEALTHRESPONSE']._serialized_end=765
-  _globals['_KVSERVICE']._serialized_start=768
-  _globals['_KVSERVICE']._serialized_end=1391
+  _globals['_FIFOLIFODELETEREQUEST']._serialized_end=633
+  _globals['_FIFOLIFOPUSHREQUEST']._serialized_start=635
+  _globals['_FIFOLIFOPUSHREQUEST']._serialized_end=713
+  _globals['_FIFOLIFOPOPREQUEST']._serialized_start=715
+  _globals['_FIFOLIFOPOPREQUEST']._serialized_end=777
+  _globals['_FIFOLIFOPOPRESPONSE']._serialized_start=779
+  _globals['_FIFOLIFOPOPRESPONSE']._serialized_end=843
+  _globals['_HEALTHRESPONSE']._serialized_start=845
+  _globals['_HEALTHRESPONSE']._serialized_end=877
+  _globals['_KVSERVICE']._serialized_start=880
+  _globals['_KVSERVICE']._serialized_end=1503
 # @@protoc_insertion_point(module_scope)

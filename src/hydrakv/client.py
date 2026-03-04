@@ -290,7 +290,8 @@ class Hydrakv:
                 client = self._get_client()
                 headers = {"X-API-Key": api_key} if api_key else {}
                 self._logger.debug(f"sending POST to {self._http_str}{self._host}:{self._port}/db/{db}/keys")
-                resp = await client.post(f"{self._http_str}{self._host}:{self._port}/db/{db}/keys", json=gr.model_dump(),
+                resp = await client.post(f"{self._http_str}{self._host}:{self._port}/db/{db}/keys",
+                                         json=gr.model_dump(),
                                          headers=headers)
                 return resp.json()["value"]
             except Exception as e:
@@ -528,12 +529,13 @@ class Hydrakv:
         self._logger.debug("Created DB: " + name)
         return resp.status_code
 
-    async def fifolifo_delete(self, name: str) -> int | Any:
+    async def fifolifo_delete(self, name: str, db: str) -> int | Any:
         """
         Deletes a FiFoLiFo by name.
 
         Parameters:
         name (str): The name of the FiFoLiFo to delete.
+        db (str): The name of the database the FiFoLiFo will be deleted for.
 
         Returns:
         int | Any: The status code or gRPC response.
@@ -543,7 +545,7 @@ class Hydrakv:
         if self._use_grpc:
             try:
                 self._logger.debug("using GRPC FIFOLIFO DELETE")
-                request = hydrakv_pb2.FiFoLiFoDeleteRequest(name=ffr.name)
+                request = hydrakv_pb2.FiFoLiFoDeleteRequest(name=ffr.name, db=db, Apikey=self._apikeys.get(db, ""))
                 response = self._stub.FiFoLiFoDelete(request, timeout=self._grpc_deadline)
                 return response
             except grpc.RpcError as e:
@@ -553,19 +555,20 @@ class Hydrakv:
             try:
                 self._logger.debug("using HTTP FIFOLIFO DELETE")
                 client = self._get_client()
-                resp = await client.request("DELETE", f"{self._http_str}{self._host}:{self._port}/fifolifo",
-                                            json=ffr.model_dump())
+                resp = await client.request("DELETE", f"{self._http_str}{self._host}:{self._port}/db/{db}/fifolifo",
+                                            json=ffr.model_dump(), headers={"X-API-Key": self._apikeys.get(db, "")})
                 return resp.status_code
             except Exception as e:
                 self._logger.error(f"HTTP FIFOLIFO DELETE failed: {e}")
                 raise
 
-    async def fifolifo_push(self, name: str, value: str) -> int | Any:
+    async def fifolifo_push(self, name: str, db: str, value: str) -> int | Any:
         """
         Pushes a value to a FiFoLiFo.
 
         Parameters:
         name (str): The name of the FiFoLiFo.
+        db (str): The name of the database the FiFoLiFo will be pushed for.
         value (str): The value to push.
 
         Returns:
@@ -576,7 +579,7 @@ class Hydrakv:
         if self._use_grpc:
             try:
                 self._logger.debug("using GRPC FIFOLIFO PUSH")
-                request = hydrakv_pb2.FiFoLiFoPushRequest(name=ffp.name, value=ffp.value)
+                request = hydrakv_pb2.FiFoLiFoPushRequest(name=ffp.name, db=db, value=ffp.value, Apikey=self._apikeys.get(db, ""))
                 response = self._stub.FiFoLiFoPush(request, timeout=self._grpc_deadline)
                 return response
             except grpc.RpcError as e:
@@ -586,19 +589,20 @@ class Hydrakv:
             try:
                 self._logger.debug("using HTTP FIFOLIFO PUSH")
                 client = self._get_client()
-                resp = await client.put(f"{self._http_str}{self._host}:{self._port}/fifolifo",
-                                        json=ffp.model_dump())
+                resp = await client.put(f"{self._http_str}{self._host}:{self._port}/db/{db}/fifolifo",
+                                        json=ffp.model_dump(), headers={"X-API-Key": self._apikeys.get(db, "")})
                 return resp.status_code
             except Exception as e:
                 self._logger.error(f"HTTP FIFOLIFO PUSH failed: {e}")
                 raise
 
-    async def fifo_pop(self, name: str) -> str:
+    async def fifo_pop(self, name: str, db: str) -> str:
         """
         Pops a value from a FiFo.
 
         Parameters:
         name (str): The name of the FiFo.
+        db (str): The name of the database the FiFo will be popped for.
 
         Returns:
         str: The popped value.
@@ -608,7 +612,7 @@ class Hydrakv:
         if self._use_grpc:
             try:
                 self._logger.debug("using GRPC FIFO POP")
-                request = hydrakv_pb2.FiFoLiFoPopRequest(name=ffp.name)
+                request = hydrakv_pb2.FiFoLiFoPopRequest(name=ffp.name, db=db, Apikey=self._apikeys.get(db, ""))
                 response = self._stub.FiFoLiFoFPop(request, timeout=self._grpc_deadline)
                 return response.value
             except grpc.RpcError as e:
@@ -618,19 +622,20 @@ class Hydrakv:
             try:
                 self._logger.debug("using HTTP FIFO POP")
                 client = self._get_client()
-                resp = await client.post(f"{self._http_str}{self._host}:{self._port}/fifo",
-                                         json=ffp.model_dump())
+                resp = await client.post(f"{self._http_str}{self._host}:{self._port}/db/{db}/fifo",
+                                         json=ffp.model_dump(), headers={"X-API-Key": self._apikeys.get(db, "")})
                 return resp.json().get("value", "")
             except Exception as e:
                 self._logger.error(f"HTTP FIFO POP failed: {e}")
                 raise
 
-    async def lifo_pop(self, name: str) -> str:
+    async def lifo_pop(self, name: str, db: str) -> str:
         """
         Pops a value from a LiFo.
 
         Parameters:
         name (str): The name of the LiFo.
+        db (str): The name of the database the LiFo will be popped for.
 
         Returns:
         str: The popped value.
@@ -640,7 +645,7 @@ class Hydrakv:
         if self._use_grpc:
             try:
                 self._logger.debug("using GRPC LIFO POP")
-                request = hydrakv_pb2.FiFoLiFoPopRequest(name=ffp.name)
+                request = hydrakv_pb2.FiFoLiFoPopRequest(name=ffp.name, db=db, Apikey=self._apikeys.get(db, ""))
                 response = self._stub.FiFoLiFoLPop(request, timeout=self._grpc_deadline)
                 return response.value
             except grpc.RpcError as e:
@@ -650,32 +655,33 @@ class Hydrakv:
             try:
                 self._logger.debug("using HTTP LIFO POP")
                 client = self._get_client()
-                resp = await client.post(f"{self._http_str}{self._host}:{self._port}/lifo",
-                                         json=ffp.model_dump())
+                resp = await client.post(f"{self._http_str}{self._host}:{self._port}/db/{db}/lifo",
+                                         json=ffp.model_dump(), headers={"X-API-Key": self._apikeys.get(db, "")})
                 return resp.json().get("value", "")
             except Exception as e:
                 self._logger.error(f"HTTP LIFO POP failed: {e}")
                 raise
 
-    async def fifolifo_create(self, name: str, limit: int) -> int:
+    async def fifolifo_create(self, name: str, db: str, limit: int) -> int:
         """
         Creates a new FiFoLiFo.
         Note: This operation is only supported via HTTP.
 
         Parameters:
         name (str): The name of the FiFoLiFo.
+        db (str): The name of the database the FiFoLiFo will be created for.
         limit (int): The limit of the FiFoLiFo.
 
         Returns:
         int: The status code of the response.
         """
-        ffc = FiFoLiFoCreate(name=name, limit=limit)
+        ffc = FiFoLiFoCreate(name=name, db=db, limit=limit, apikey=self._apikeys.get(db, ""))
 
         try:
             self._logger.debug("using HTTP FIFOLIFO CREATE")
             client = self._get_client()
-            resp = await client.post(f"{self._http_str}{self._host}:{self._port}/fifolifo",
-                                     json=ffc.model_dump())
+            resp = await client.post(f"{self._http_str}{self._host}:{self._port}/db/{db}/fifolifo",
+                                     json=ffc.model_dump(), headers={"X-API-Key": self._apikeys.get(db, "")})
             return resp.status_code
         except Exception as e:
             self._logger.error(f"HTTP FIFOLIFO CREATE failed: {e}")
