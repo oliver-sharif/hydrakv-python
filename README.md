@@ -151,6 +151,38 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
+## Client-Side Encryption
+
+HydraKV supports optional client-side encryption for values. This ensures that the server never sees the raw data. The encryption uses RSA key pairs, which are automatically generated and managed by the client.
+
+To enable encryption, provide `value_encryption=True` and a `value_secret` (bytes) to the `Hydrakv` constructor.
+
+```python
+import asyncio
+from hydrakv import Hydrakv
+
+async def main():
+    # Initialize client with encryption
+    # A secret key (bytes) is required to protect the local RSA key file
+    secret = b"my_super_secret_password"
+    hc = Hydrakv(host="127.0.0.1", value_encryption=True, value_secret=secret)
+    
+    db_name = "encrypted_db"
+    await hc.create_db(db_name)
+    
+    # Values are automatically encrypted before being sent to the server
+    await hc.set(db_name, "secret_key", "top_secret_value")
+    
+    # Values are automatically decrypted when retrieved
+    val = await hc.get(db_name, "secret_key")
+    print(f"Decrypted value: {val}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+By default, the RSA keys are stored in `./.keys/<host>.key`. You can specify a custom path using the `value_encryption_path` parameter.
+
 ## License
 
 MIT

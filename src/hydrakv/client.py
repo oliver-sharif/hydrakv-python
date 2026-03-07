@@ -1,9 +1,12 @@
+import os
 import sys
 from asyncio import run
 from typing import Dict, Any
 
 from httpx import Client, AsyncClient
 from loguru import logger
+
+from pathlib import Path
 
 import grpc
 from .models import hydrakv_pb2_grpc
@@ -12,6 +15,8 @@ from .models import hydrakv_pb2
 from .models.http_models import *
 
 import json
+
+from .encryption_manager import EncryptionManager
 
 
 class Hydrakv:
@@ -27,7 +32,8 @@ class Hydrakv:
 
     def __init__(self, host: str = "127.0.0.1", port: int = 9191, use_grpc: bool = False, grpc_port: int = 9292,
                  grpc_deadline: int = 3, https: bool = False, log_lvl: str = "DEBUG", trusted_cert: str = None,
-                 api_key: Dict = None) -> None:
+                 api_key: Dict = None, value_encryption: bool = False, value_secret: bytes = None,
+                 value_encryption_path: str = "") -> None:
         """
         Initializes the client for connecting to a HydraKV server.
 
@@ -51,6 +57,9 @@ class Hydrakv:
             log_lvl: String denoting the logging level, e.g., "DEBUG", "INFO".
             trusted_cert: Path to the trusted certificate file for HTTPS connections.
             api_key: The API key for authentication. e.g {"dbname": "apikey", ...}
+            value_encryption: Whether to use client sided value encryption - the key will *NOT* be encrypted!. Defaults to False.
+            value_secret: The secret key for encrypting the pub/priv keypair. Defaults to None.
+            value_encryption_path: The path to the encryption key file. Defaults to "".
 
         Raises:
             Exception: Raised if the client cannot connect to the HydraKV server or if the
@@ -88,6 +97,16 @@ class Hydrakv:
 
         # set the protocol
         self._set_protocol()
+
+        # if key_value_encryption is True, we need to set the secret key
+        if value_encryption:
+            if value_secret is None:
+                raise Exception("key_value_secret is required if key_value_encryption is True")
+            self._key_value_encryption = True
+            self._encryption_handler = EncryptionManager(server_name=self._host,
+                                                         key_path=Path(value_encryption_path) if os.path.exists(
+                                                             value_encryption_path) else None,
+                                                         secret_key=value_secret)
 
         # Ok lets Check if we can connect to the server
         try:
@@ -198,7 +217,7 @@ class Hydrakv:
             return response.json()
         except Exception as e:
             self._logger.error("Not connected to Server: " + str(e))
-            exit(1)
+            sys.exit(1)
 
     async def set(self, db: str, key: str, value: str, ttl: int = 0, api_key: str = None) -> int | Any:
         """
@@ -223,6 +242,10 @@ class Hydrakv:
         # use api key if provided, else use the one from the instance
         if api_key is None:
             api_key = self._apikeys.get(db, "")
+
+        # if encryption is enabled, encrypt the value
+        if self._key_value_encryption:
+            value = self._encryption_handler.encrypt(value)
 
         # create the model for the request
         sr = Set(key=key, apikey=api_key, value=value, ttl=ttl)
@@ -280,7 +303,11 @@ class Hydrakv:
                 self._logger.debug("using GRPC GET")
                 request = hydrakv_pb2.GetRequest(db=db, apikey=gr.apikey, key=key)
                 response = self._stub.Get(request, timeout=self._grpc_deadline)
-                return response.value
+                val = response.value
+
+                if self._key_value_encryption:
+                    val = self._encryption_handler.decrypt(val)
+                return val
             except grpc.RpcError as e:
                 self._logger.error(f"GRPC GET failed: {e}")
                 raise
@@ -293,7 +320,13 @@ class Hydrakv:
                 resp = await client.post(f"{self._http_str}{self._host}:{self._port}/db/{db}/keys",
                                          json=gr.model_dump(),
                                          headers=headers)
-                return resp.json()["value"]
+                val = resp.json()["value"]
+
+                # decrypt the value if encryption is enabled
+                if self._key_value_encryption:
+                    val = self._encryption_handler.decrypt(val)
+                return val
+
             except Exception as e:
                 self._logger.error(f"HTTP GET failed: {e}")
                 raise
@@ -315,6 +348,10 @@ class Hydrakv:
         # use api key if provided, else use the one from the instance
         if api_key is None:
             api_key = self._apikeys.get(db, "")
+
+        # encrypt the key if encryption is enabled
+        if self._key_value_encryption:
+            value = self._encryption_handler.encrypt(value)
 
         sr = SetNX(key=key, value=value, ttl=ttl, apikey=api_key)
 
@@ -396,6 +433,10 @@ class Hydrakv:
         # use api key if provided, else use the one from the instance here
         if api_key is None:
             api_key = self._apikeys.get(db, "")
+
+        # encrypt the key if encryption is enabled
+        if self._key_value_encryption:
+            key = self._encryption_handler.encrypt(key)
 
         dr = Delete(key=key, apikey=api_key)
 
@@ -574,12 +615,18 @@ class Hydrakv:
         Returns:
         int | Any: The status code or gRPC response.
         """
+
+        # encrypt the value if encryption is enabled
+        if self._key_value_encryption:
+            value = self._encryption_handler.encrypt(value)
+
         ffp = FiFoLiFoPush(name=name, value=value)
 
         if self._use_grpc:
             try:
                 self._logger.debug("using GRPC FIFOLIFO PUSH")
-                request = hydrakv_pb2.FiFoLiFoPushRequest(name=ffp.name, db=db, value=ffp.value, Apikey=self._apikeys.get(db, ""))
+                request = hydrakv_pb2.FiFoLiFoPushRequest(name=ffp.name, db=db, value=ffp.value,
+                                                          Apikey=self._apikeys.get(db, ""))
                 response = self._stub.FiFoLiFoPush(request, timeout=self._grpc_deadline)
                 return response
             except grpc.RpcError as e:
@@ -614,6 +661,10 @@ class Hydrakv:
                 self._logger.debug("using GRPC FIFO POP")
                 request = hydrakv_pb2.FiFoLiFoPopRequest(name=ffp.name, db=db, Apikey=self._apikeys.get(db, ""))
                 response = self._stub.FiFoLiFoFPop(request, timeout=self._grpc_deadline)
+
+                # decrypt value if encryption is enabled
+                if self._key_value_encryption:
+                    response.value = self._encryption_handler.decrypt(response.value)
                 return response.value
             except grpc.RpcError as e:
                 self._logger.error(f"GRPC FIFO POP failed: {e}")
@@ -624,6 +675,9 @@ class Hydrakv:
                 client = self._get_client()
                 resp = await client.post(f"{self._http_str}{self._host}:{self._port}/db/{db}/fifo",
                                          json=ffp.model_dump(), headers={"X-API-Key": self._apikeys.get(db, "")})
+                # decrypt value if encryption is enabled
+                if self._key_value_encryption:
+                    resp = self._encryption_handler.decrypt(resp.json().get("value", ""))
                 return resp.json().get("value", "")
             except Exception as e:
                 self._logger.error(f"HTTP FIFO POP failed: {e}")
@@ -647,6 +701,9 @@ class Hydrakv:
                 self._logger.debug("using GRPC LIFO POP")
                 request = hydrakv_pb2.FiFoLiFoPopRequest(name=ffp.name, db=db, Apikey=self._apikeys.get(db, ""))
                 response = self._stub.FiFoLiFoLPop(request, timeout=self._grpc_deadline)
+                # decrypt value if encryption is enabled
+                if self._key_value_encryption:
+                    response.value = self._encryption_handler.decrypt(response.value)
                 return response.value
             except grpc.RpcError as e:
                 self._logger.error(f"GRPC LIFO POP failed: {e}")
@@ -657,7 +714,10 @@ class Hydrakv:
                 client = self._get_client()
                 resp = await client.post(f"{self._http_str}{self._host}:{self._port}/db/{db}/lifo",
                                          json=ffp.model_dump(), headers={"X-API-Key": self._apikeys.get(db, "")})
-                return resp.json().get("value", "")
+                # decrypt value if encryption is enabled
+                if self._key_value_encryption:
+                    resp = self._encryption_handler.decrypt(resp.json().get("value", ""))
+                return resp
             except Exception as e:
                 self._logger.error(f"HTTP LIFO POP failed: {e}")
                 raise
