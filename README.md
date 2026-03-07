@@ -185,4 +185,4 @@ By default, the RSA keys are stored in `./.keys/<host>.key`. You can specify a c
 
 ## License
 
-MIT
+Apache 2
